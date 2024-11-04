@@ -8,22 +8,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use((req, res, next) => {
+    // Comentarios explicativos
     res.setHeader(
         'Access-Control-Allow-Origin', 
-        '*'
+        'http://localhost:4200'
     );
     res.setHeader(
-        'Acccess-Control-Allow-Header',
-        'Origin, X-Request-Wtih, Content-Type, Accept'
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept'
     );
     res.setHeader(
-        'Acccess-Control-Allow-Methods',
-        'GET, POST, PATCH, DELETE OPTIONS'
+        'Access-Control-Allow-Methods',
+        'GET, POST, PATCH, DELETE, OPTIONS'
     );
     next();
-})
+});
 
-app.use('/api/posts', (req, res, next) => {
+app.post('/api/posts', (req, res, next) => {
     const post = req.body;
     console.log(post);
     res.status(201).json({
@@ -32,7 +33,7 @@ app.use('/api/posts', (req, res, next) => {
 });
 
 
-app.use('/api/posts', (req, res, next) => {
+app.get('/api/posts', (req, res, next) => {
     const posts = [
         { 
             id: 'sdfnad',
