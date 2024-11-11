@@ -99,7 +99,7 @@ router.get('', (req, res, next) => {
                     id: doc._id,
                     title: doc.title,
                     content: doc.content,
-                    imagesPath: doc.imagePath
+                    imagePath: doc.imagePath
                 };
             })        
         });

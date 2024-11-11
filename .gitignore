@@ -220,3 +220,7 @@ $RECYCLE.BIN/
 .env.dev
 .env.prod
 .env
+
+images/
+
+backend/images/
