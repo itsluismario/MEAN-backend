@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
 const postsRoutes = require('./routes/posts.route');
+const path = require('path');
 
 require('dotenv').config({ path: '.env.dev' });
 
@@ -19,6 +20,7 @@ mongoose.connect(mongoUri)
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
     // Comentarios explicativos
@@ -38,5 +40,14 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/posts',postsRoutes);
+
+// Error handling middleware for file serving
+app.use((err, req, res, next) => {
+    if (err.code === 'ENOENT') {
+        res.status(404).json({ message: 'File not found' });
+    } else {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 module.exports = app;

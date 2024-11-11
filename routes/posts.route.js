@@ -3,6 +3,7 @@ const express = require('express');
 const Post = require('../models/post');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs'); 
 
 const router = express.Router();
 
@@ -12,9 +13,6 @@ const MIME_TYPE_MAP = {
     'image/jpg': 'jpg'
 };
 
-// Get the absolute path to the images directory
-const imagesPath = path.join(__dirname, '..', 'images');
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const isValid = MIME_TYPE_MAP[file.mimetype];
@@ -22,10 +20,14 @@ const storage = multer.diskStorage({
         
         if (isValid) {
             error = null;
-        } 
-        // Use the absolute path for destination
-        cb(error, imagesPath);
-    }, 
+        }
+        // Create images directory if it doesn't exist
+        const imagesDir = path.join(__dirname, '..', 'images');
+        if (!fs.existsSync(imagesDir)){
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+        cb(error, imagesDir);
+    },
     filename: (req, file, cb) => {
         const name = file.originalname.toLowerCase().split(' ').join('-');
         const ext = MIME_TYPE_MAP[file.mimetype];
@@ -35,22 +37,23 @@ const storage = multer.diskStorage({
 
 router.post('', multer({ storage: storage }).single('image'), (req, res, next) => {
     const url = req.protocol + '://' + req.get('host');
-    console.log('req.protocol ', req.protocol, 'req.get(host)', req.get('host') );
+    const imagePath = req.file ? '/images/' + req.file.filename : null;
     
     const post = new Post({
         title: req.body.title,
         content: req.body.content,
-        imagePath: url + '/images/' + req.file.filename
+        imagePath: imagePath ? url + imagePath : null
     });
     
     post.save()
         .then(createdPost => {            
             res.status(201).json({
                 message: 'Post added successfully',
-                postId: createdPost._id,
                 post: {
-                    ...createdPost,
-                    id: createdPost._id
+                    id: createdPost._id,
+                    title: createdPost.title,
+                    content: createdPost.content,
+                    imagePath: createdPost.imagePath
                 }
             });
         })
@@ -95,7 +98,8 @@ router.get('', (req, res, next) => {
                 return {
                     id: doc._id,
                     title: doc.title,
-                    content: doc.content
+                    content: doc.content,
+                    imagesPath: doc.imagePath
                 };
             })        
         });
