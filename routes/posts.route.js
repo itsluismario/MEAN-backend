@@ -2,6 +2,7 @@
 const express = require('express');
 const Post = require('../models/post');
 const multer = require('multer');
+const path = require('path');
 
 const router = express.Router();
 
@@ -11,14 +12,19 @@ const MIME_TYPE_MAP = {
     'image/jpg': 'jpg'
 };
 
+// Get the absolute path to the images directory
+const imagesPath = path.join(__dirname, '..', 'images');
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const isValid = MIME_TYPE_MAP[file.mimetype];
         let error = new Error('Invalid mime type');
+        
         if (isValid) {
             error = null;
         } 
-        cb(error, 'backend/images');
+        // Use the absolute path for destination
+        cb(error, imagesPath);
     }, 
     filename: (req, file, cb) => {
         const name = file.originalname.toLowerCase().split(' ').join('-');
@@ -27,11 +33,14 @@ const storage = multer.diskStorage({
     }
 });
 
-router.post('', multer(storage).single('image'),(req, res, next) => {
+router.post('', multer({ storage: storage }).single('image'), (req, res, next) => {
+    const url = req.protocol + '://' + req.get('host');
     const post = new Post({
         title: req.body.title,
-        content: req.body.content
+        content: req.body.content,
+        imagePath: req.file ? url + '/images/' + req.file.filename : null
     });
+    
     post.save()
         .then(createdPost => {            
             res.status(201).json({
@@ -40,8 +49,16 @@ router.post('', multer(storage).single('image'),(req, res, next) => {
                 post: {
                     id: createdPost._id,
                     title: createdPost.title,
-                    content: createdPost.content
+                    content: createdPost.content,
+                    imagePath: createdPost.imagePath
                 }
+            });
+        })
+        .catch(error => {
+            console.error('Error saving post:', error);
+            res.status(500).json({
+                message: 'Creating a post failed!',
+                error: error.message
             });
         });
 });
