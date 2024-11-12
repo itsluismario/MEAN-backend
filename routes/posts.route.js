@@ -66,16 +66,22 @@ router.post('', multer({ storage: storage }).single('image'), (req, res, next) =
         });
 });
 
-router.put('/:id', (req, res, next) => {
-    const post = new Post({
-        _id: req.body.id,
+router.put('/:id', multer({ storage: storage }).single('image'), (req, res, next) => {
+    let imagePath = req.body.imagePath;
+    if (req.file) {
+        const url = req.protocol + '://' + req.get('host');
+        imagePath = url + '/images/' + req.file.filename; 
+    }
+    const updateData = {
         title: req.body.title,
-        content: req.body.content
-    });
+        content: req.body.content,
+        imagePath: imagePath
+    };
+    
     Post.updateOne(
-        { _id: req.params.id },  // filter criteria
-        { $set: post }           // update document
-        ).then(result => {
+        { _id: req.params.id }, 
+        { $set: updateData })           
+        .then(result => {
         res.status(200).json({ message: 'Update successful!'});
     });
 });
