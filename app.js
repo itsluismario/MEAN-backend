@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 
 const postsRoutes = require('./routes/posts.route');
-const signupRoutes = require('./routes/signup.route');
+const userRoutes = require('./routes/users.route');
 
 require('dotenv').config({ path: '.env.dev' });
 
@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/posts',postsRoutes);
-app.use('/api/signup',signupRoutes);
+app.use('/api/users',userRoutes);
 
 // Error handling middleware for file serving
 app.use((err, req, res, next) => {
