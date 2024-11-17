@@ -33,7 +33,7 @@ router.post("/signup", (req, res, next) => {
 });
 
 router.post('/login', (req, res, next) => {
-    let fetchedUser;
+    let fetchedUser;    
     User.findOne({ email: req.body.email })
         .then(user => {
             if(!user) {
