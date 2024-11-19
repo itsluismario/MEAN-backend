@@ -43,18 +43,19 @@ router.post('', checkAuth, multer({ storage: storage }).single('image'), (req, r
     const post = new Post({
         title: req.body.title,
         content: req.body.content,
-        imagePath: imagePath ? url + imagePath : null
+        imagePath: imagePath ? url + imagePath : null,
+        creator: req.userData.userId
     });
-    
     post.save()
-        .then(createdPost => {            
+        .then(createdPost => {                        
             res.status(201).json({
                 message: 'Post added successfully',
                 post: {
                     id: createdPost._id,
                     title: createdPost.title,
                     content: createdPost.content,
-                    imagePath: createdPost.imagePath
+                    imagePath: createdPost.imagePath,
+                    creator: createdPost.creator
                 }
             });
         })
@@ -111,18 +112,19 @@ router.get('', (req, res, next) => {
     
     postQuery
         .then(documents => {
-            fetchedPosts = documents;
+            fetchedPosts = documents;      
             return Post.countDocuments();
         })
         .then(count => {
             res.status(200).json({
                 message: 'Posts fetched successfully',
-                posts: fetchedPosts.map(doc => {
+                posts: fetchedPosts.map(doc => {                    
                     return {
                         id: doc._id,
                         title: doc.title,
                         content: doc.content,
-                        imagePath: doc.imagePath
+                        imagePath: doc.imagePath,
+                        creator: doc.creator
                     }
                 }),       
                 maxPosts: count
