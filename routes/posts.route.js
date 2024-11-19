@@ -77,7 +77,8 @@ router.put('/:id', checkAuth, multer({ storage: storage }).single('image'), (req
     const updateData = {
         title: req.body.title,
         content: req.body.content,
-        imagePath: imagePath
+        imagePath: imagePath,
+        creator: req.userData.userId
     };
     
     Post.updateOne(
